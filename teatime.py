@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import sys
@@ -7,10 +6,16 @@ from time import sleep
 # Parse all of the arguments
 def args_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--custom', help='Customise water temperatures',
-                        action='store_true')
     parser.add_argument('-t', '--timer', help='Initialise a timer',
                         action='store_true')
+    parser.add_argument('-th','--temphot', help='Temperature of hot water',
+                        action='store', default=100., type=float)
+    parser.add_argument('-tc', '--tempcold', help='Temperature of cold water',
+                        action='store', default=20., type=float)
+    parser.add_argument('-vh', '--volumehot', help='Volume of hot water',
+                        action='store', type=float)
+    parser.add_argument('-tt', '--temptarget', help='Temperate target',
+                        action='store', default=60., type=float)
     args = parser.parse_args()
     return args
 
@@ -40,17 +45,12 @@ def timer():
 # volume.
 def main():
     args = args_parser()
-    
-    t1 = 100
-    t2 = 20
-    
-    if args.custom:
-        t1 = float(input('Enter the temperature of the hot water: '))
-        t2 = float(input('Enter the temperature of the cold water: '))
-    
-    t0 = float(input('Enter the target temperature: '))
-    v1 = float(input('Enter the volume of hot water [in liter]: '))
-    v2 = calculate_volume(v1, t0, t1, t2)
+    if args.volumehot == None:
+        vh = float(input('Volume of hot water:'))
+    else:
+        vh = args.volumehot
+
+    v2 = calculate_volume(vh, args.temptarget, args.temphot, args.tempcold)
 
     print('\nPlease add {:.2f} l of cold water to the hot water.'.format(v2))
     
@@ -62,3 +62,4 @@ def main():
 
 if __name__=='__main__':
     main()
+
