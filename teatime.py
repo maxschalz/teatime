@@ -1,12 +1,12 @@
 import argparse
-import os
-import sys
+from subprocess import run
+from sys import platform
 from time import sleep
 
-# Parse all of the arguments
+
 def args_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--timer', help='Initialise a timer',
+    parser.add_argument('-nt', '--notimer', help='Disable the timer',
                         action='store_true')
     parser.add_argument('-th','--temphot', help='Temperature of hot water',
                         action='store', default=100., type=float)
@@ -14,52 +14,65 @@ def args_parser():
                         action='store', default=20., type=float)
     parser.add_argument('-vh', '--volumehot', help='Volume of hot water',
                         action='store', type=float)
-    parser.add_argument('-tt', '--temptarget', help='Temperate target',
+    parser.add_argument('-tt', '--temptarget', help='Target temperature',
                         action='store', default=60., type=float)
     args = parser.parse_args()
     return args
 
-# Calculate the volume of water that needs to be added. It is assumed that the
-# density of water is 1 kg/l.
+
 def calculate_volume(v1, t0, t1, t2):
+    """Calculate the volume of water that needs to be added.
+
+    Parameters
+    ----------
+    v1 : float
+        Volume of hot water
+    t0 : float
+        Target temperature
+    t1 : float
+        Temperature of hot water
+    t2 : float
+        Temperature of cold water
+    """
     return v1 * (t1 - t0) / (t0 - t2)
 
+
 def timer():
-    if sys.platform not in ('linux', 'darwin'):
-        print('The timer function only works on Linux or Mac OS platforms.')
-        return 1
-    
+    """Set timer and play sound at the end of the timer."""
     print('Please enter how long the tea should steep.')
     minutes = float(input('Minutes: '))
     seconds = float(input('Seconds: '))
     sleep(minutes*60 + seconds)
-    
-    print('Your tea is ready!')
-    if sys.platform=='linux':
-        os.system('aplay /usr/share/sounds/KDE-Sys-App-Positive.ogg;')
-    elif sys.platform=='darwin':
-        os.system('afplay /System/Library/Sounds/Blow.aiff --volume 10;')
-    return 0
 
-# Main function. Sets input temperatures and volumes and calculates the target
-# volume.
+    print('Your tea is ready!')
+    if platform=='linux':
+        run('aplay /usr/share/sounds/KDE-Sys-App-Positive.ogg;'.split())
+        return
+    elif platform=='darwin':
+        run('afplay /System/Library/Sounds/Blow.aiff --volume 10;'.split())
+        return
+
+    msg = 'The timer function only works on Linux or Mac OS platforms.'
+    raise RuntimeError(msg)
+
+
 def main():
+    """Set input temperatures and volumes and calculate the target volume."""
     args = args_parser()
     if args.volumehot == None:
-        vh = float(input('Volume of hot water:'))
+        vh = float(input('Volume of hot water: '))
     else:
         vh = args.volumehot
 
     v2 = calculate_volume(vh, args.temptarget, args.temphot, args.tempcold)
 
-    print('\nPlease add {:.2f} l of cold water to the hot water.'.format(v2))
-    
-    if args.timer:
+    print(f'\nPlease add {v2:.2f} l of cold water to the hot water to obtain '
+          f'{args.temptarget}°C hot water.')
+
+    if not args.notimer:
         timer()
     print('Enjoy your tea!')
 
-    return 0
 
 if __name__=='__main__':
     main()
-
