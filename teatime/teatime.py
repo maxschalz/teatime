@@ -2,6 +2,7 @@ import argparse
 from subprocess import run
 from sys import platform
 from time import sleep
+
 try:
     # tqdm nodule is not mandatory.
     from tqdm import tqdm
