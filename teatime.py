@@ -2,6 +2,11 @@ import argparse
 from subprocess import run
 from sys import platform
 from time import sleep
+try:
+    # tqdm nodule is not mandatory.
+    from tqdm import tqdm
+except ModuleNotFoundError:
+    tqdm = lambda x: x
 
 
 def args_parser():
@@ -42,7 +47,8 @@ def timer():
     print('Please enter how long the tea should steep.')
     minutes = float(input('Minutes: '))
     seconds = float(input('Seconds: '))
-    sleep(minutes*60 + seconds)
+    for _ in tqdm(range(int(minutes*60 + seconds))):
+        sleep(1)
 
     print('Your tea is ready!')
     if platform=='linux':
