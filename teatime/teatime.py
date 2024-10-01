@@ -49,7 +49,7 @@ def timer():
     """Set timer and play sound at the end of the timer."""
     print('Please enter how long the tea should steep.')
     minutes = float(input('Minutes: '))
-    seconds = float(input('Seconds: '))
+    seconds = float(input('Seconds: ') or '0')
     for _ in tqdm(range(int(minutes*60 + seconds))):
         sleep(1)
 
